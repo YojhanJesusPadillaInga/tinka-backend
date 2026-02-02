@@ -4,10 +4,12 @@ pipeline {
     stages {
         stage('Construir (Build)') {
             steps {
-                echo '--- Compilando para Windows ---'
-                // Windows no necesita chmod.
-                // Usamos 'bat' y llamamos al archivo .bat de Gradle
-                bat 'gradlew.bat clean build -x test'
+                echo '--- Compilando proyecto ---'
+                // CAMBIO 1: Le decimos a Jenkins "Entra a la carpeta core-service"
+                dir('core-service') {
+                    // Ahora sí va a encontrar el gradlew.bat
+                    bat 'gradlew.bat clean build -x test'
+                }
             }
         }
 
@@ -15,12 +17,10 @@ pipeline {
             steps {
                 echo '--- Subiendo a la nube ---'
                 sshagent(['llave-ec2-tinka']) {
-                    // Usamos 'bat' en vez de 'sh' para los comandos SSH/SCP
+                    // CAMBIO 2: La ruta del JAR ahora incluye 'core-service/' al principio
+                    bat 'scp -o StrictHostKeyChecking=no core-service/build/libs/*.jar ec2-user@18.218.57.202:/home/ec2-user/app-tinka.jar'
                     
-                    // 1. Subir el JAR
-                    bat 'scp -o StrictHostKeyChecking=no build/libs/*.jar ec2-user@18.218.57.202:/home/ec2-user/app-tinka.jar'
-                    
-                    // 2. Reiniciar el servicio
+                    // Esto sigue igual
                     bat 'ssh -o StrictHostKeyChecking=no ec2-user@18.218.57.202 "sudo systemctl restart tinka-backend.service"'
                 }
             }
