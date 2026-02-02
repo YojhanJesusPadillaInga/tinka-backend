@@ -1,0 +1,75 @@
+# ========================
+# CONFIGURACIÓN GLOBAL
+# ========================
+spring:
+  application:
+    name: tinka-core-service
+  # Por defecto usará 'dev' (tu PC).
+  # En la nube forzaremos el cambio a 'prod' con un comando.
+  profiles:
+    active: dev
+
+---
+# ========================
+# PERFIL: DEV (Tu Local)
+# ========================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tinka_db_local
+    username: postgres
+    password: latinka123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: "test"
+        secret-key: "test"
+      sqs:
+        enabled: false
+
+logging:
+  level:
+    root: INFO
+
+---
+# ========================
+# PERFIL: PROD (Para AWS EC2)
+# ========================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    # AQUÍ ESTÁ LA MAGIA: Usamos variables que inyectaremos en el servidor
+    url: jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # 'update' creará las tablas en RDS automáticamente la primera vez
+      ddl-auto: update
+    show-sql: false # En producción no queremos ensuciar los logs
+
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      # En EC2 no ponemos credenciales, usa el Rol del servidor automáticamente
