@@ -1,5 +1,5 @@
 plugins {
-	// Cambia la versión que tengas por la 2.7.18 (La última estable para Java 8)
+    // Correcto: Spring Boot 2.7.18 para Java 8
     id 'org.springframework.boot' version '2.7.18'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id 'java'
@@ -10,41 +10,48 @@ version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        // CAMBIO 1: Forzamos Java 8 para evitar confusiones, ya que tu proyecto es Legacy
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.postgresql:postgresql'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// 3. AWS (Gestión de versiones)
-	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.2.0")
-	// Si NO vas a probar SQS en local todavía, comenta esta línea para evitar errores de arranque,
-	// o configúralo como "false" en el yml (te enseño abajo).
-	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
-	// Utilidades
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // --- CAMBIO 2: AWS PARA SPRING BOOT 2.7 ---
+    
+    // Usamos la versión 2.4.4 que es compatible con Java 8 y Spring Boot 2.7
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:2.4.4")
+    
+    // OJO: En la versión 2.x, el nombre de la librería de SQS es diferente.
+    // Antes tenías: spring-cloud-aws-starter-sqs (Eso es para la versión 3)
+    // Ahora debes usar: spring-cloud-starter-aws-messaging
+    implementation 'io.awspring.cloud:spring-cloud-starter-aws-messaging'
+    
+    // Utilidades
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
