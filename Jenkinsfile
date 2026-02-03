@@ -19,7 +19,7 @@ pipeline {
                     
                     // PASO 1 (NUEVO): Corregir permisos de la llave en Windows
                     // "icacls" elimina la herencia (/inheritance:r) y solo da permiso al dueño actual (/grant:r)
-                    bat 'icacls "%MY_KEY%" /inheritance:r /grant:r "%USERNAME%":F'
+                    bat 'icacls "%MY_KEY%" /inheritance:r /grant:r SYSTEM:F'
                     
                     // PASO 2: Subir el archivo (Ahora SSH aceptará la llave)
                     bat 'scp -o StrictHostKeyChecking=no -i "%MY_KEY%" core-service/build/libs/core-service-0.0.1-SNAPSHOT.jar ec2-user@18.218.57.202:/home/ec2-user/app-tinka.jar'
